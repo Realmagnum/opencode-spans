@@ -1,0 +1,53 @@
+{
+  "name": "opencode-spans",
+  "version": "0.1.0",
+  "description": "Annotate spans of OpenCode agent replies and attach your comments to the next prompt.",
+  "keywords": [
+    "opencode",
+    "opencode-plugin",
+    "annotation",
+    "review",
+    "tui"
+  ],
+  "license": "MIT",
+  "type": "module",
+  "files": [
+    "src",
+    "dist",
+    "server.ts",
+    "tui.tsx",
+    "rpc.ts",
+    "README.md",
+    "LICENSE"
+  ],
+  "exports": {
+    ".": "./src/server.ts",
+    "./server": "./src/server.ts",
+    "./tui": "./dist/tui.js",
+    "./rpc": "./src/rpc.ts"
+  },
+  "scripts": {
+    "build": "node build.mjs",
+    "typecheck": "tsc --noEmit",
+    "test": "node --experimental-strip-types --test \"test/**/*.test.ts\"",
+    "ci": "npm run typecheck && npm test && npm run build && node scripts/check-dist.mjs"
+  },
+  "devDependencies": {
+    "@babel/core": "7.28.0",
+    "@babel/preset-typescript": "7.27.1",
+    "@opencode/plugin": "2.0.29",
+    "@opentui/core": "0.7.0",
+    "@opentui/solid": "0.7.0",
+    "babel-preset-solid": "1.9.12",
+    "esbuild": "0.25.12",
+    "solid-js": "1.9.12",
+    "typescript": "5.9.3"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Realmagnum/opencode-spans.git"
+  }
+}
