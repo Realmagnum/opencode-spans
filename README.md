@@ -29,6 +29,12 @@ opencode plugin add github:Realmagnum/opencode-spans
 
 Restart OpenCode, then run `/spans` in a session that has at least one assistant reply.
 
+> Some OpenCode 2.0.x builds fail to install a git plugin pinned to a tag or commit
+> (`#v0.1.0`) with `git dep preparation failed`, while the same plugin installs from
+> `#main`. If you hit that, install `github:Realmagnum/opencode-spans#main`, or run
+> `npm install github:Realmagnum/opencode-spans#v0.1.0` inside `~/.config/opencode` and
+> add the package name to `plugins`.
+
 ### Local development
 
 ```sh
