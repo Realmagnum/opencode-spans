@@ -114,7 +114,7 @@ durable server-side state, keyboard-only selection, and edit/delete of staged it
 - S3 — `src/core/hook.ts` owns the prompt rule behind an injected dependency surface; `test/hook.test.ts` asserts the exact rewritten prompt, the shifted `files`/`agents` mention offsets, the per-message staleness check, the consumed-once path, and metadata-based self-detection.
 - S4 — `src/tui.tsx` typechecks against `@opencode/plugin@2.0.29` and builds; the server half loads from a git install (`loading plugin id=github:Realmagnum/opencode-spans#main entrypoint=.../src/server.ts`) with no error in the log.
 - S5 — `.github/workflows/ci.yml` runs typecheck, tests, build, `scripts/check-dist.mjs`, and `git diff --exit-code -- dist`; the run on `main` completed successfully in 21 s.
-- S6 — installed through `opencode plugin add github:Realmagnum/opencode-spans`; the server part registers and the log shows no plugin error. Reaching the TUI panel itself needs an interactive session, so `/spans` is verified by typecheck + build, not by an automated keystroke test.
+- S6 — `opencode plugin add` fails on this 2.0.29 build (`git dep preparation failed` inside its bundled npm, for any ref). Installed with `npm install github:Realmagnum/opencode-spans#v0.1.0` in `~/.config/opencode` and pointed `plugins` at the package directory; the log shows `loading plugin ... entrypoint=.../opencode-spans/server.ts` with no error. Reaching the TUI panel itself needs an interactive session, so `/spans` is verified by typecheck + build, not by an automated keystroke test.
 - S7 — https://github.com/Realmagnum/opencode-spans, branch `main`, tag `v0.1.0`, topics set.
 
 Notes:
