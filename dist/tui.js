@@ -292,6 +292,8 @@ var SpansRpc = Rpc.define({
 
 // src/tui.tsx
 var PANEL = "spans.panel";
+var [recordRevision, setRecordRevision] = createSignal(0);
+var bumpRecordRevision = () => setRecordRevision((value) => value + 1);
 function clip(value, max) {
   const flat = value.replace(/\s+/g, " ").trim();
   return flat.length > max ? `${flat.slice(0, Math.max(0, max - 1))}\u2026` : flat;
@@ -323,7 +325,7 @@ function useRecord(context, sessionID2) {
       sessionID: id,
       record: next
     });
-    await refresh();
+    bumpRecordRevision();
   };
   const drop = async () => {
     const id = sessionID2();
@@ -331,7 +333,7 @@ function useRecord(context, sessionID2) {
     await rpc.drop({
       sessionID: id
     });
-    await refresh();
+    bumpRecordRevision();
   };
   const take = async () => {
     const id = sessionID2();
@@ -339,12 +341,12 @@ function useRecord(context, sessionID2) {
     const result = await rpc.take({
       sessionID: id
     });
-    await refresh();
+    bumpRecordRevision();
     return result.present ? result.record : null;
   };
-  onMount(() => void refresh());
   createEffect(() => {
     sessionID2();
+    recordRevision();
     void refresh();
   });
   let off;

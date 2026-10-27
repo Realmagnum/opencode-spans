@@ -4,6 +4,23 @@ Annotate spans of OpenCode agent replies and attach your comments to the next pr
 
 Select a few words from any earlier assistant reply, write what you think about them, and the next message you send carries every annotation as a quoted block. The agent sees exactly the text you selected, with its markdown intact, and answers each comment.
 
+> **Status: frozen — terminal only.** OpenCode Desktop **2.2.0** ships the same idea natively:
+> select text in the session timeline, press **Quote**, add an optional comment, and each quote
+> rides along with the next prompt. Desktop is therefore not a target for this plugin — it
+> cannot render TUI slots, and the GUI plugin API has no timeline-selection hook. The project
+> stays available for the TUI, where it adds exact source quoting, `messageID`/fingerprint
+> tracking, keyboard-only selection and search; only fixes are planned. See
+> [Scope](#scope).
+
+## Scope
+
+| Surface | Status |
+| --- | --- |
+| Desktop (macOS, Windows, Linux) | **Not supported.** Use the built-in Quote action (2.2.0+). |
+| TUI (`opencode` in a terminal) | Supported: panel, composer strip, `/spans` and the commands below. |
+| Server hook (any client) | Loads everywhere, but only attaches annotations that were staged in the TUI. |
+
+
 ```
       Spans ─────────────────────────────── Reply 3 of 7 (latest)
       drag select · shift+←/→ word · shift+↑/↓ line · ↑/↓ reply
@@ -66,6 +83,11 @@ Add the directory to `plugins` in `~/.config/opencode/opencode.json`:
 Local directories are resolved by file name at the package root (`server.ts`, `tui.tsx`,
 `rpc.ts`), which is why those three shims exist next to `src/`. Published packages are
 resolved through `exports` in `package.json`.
+
+The root `tui.tsx` shim re-exports `dist/tui.js`, not `src/tui.tsx`: the loader transpiles a
+root TSX file with its own JSX runtime, which resolves to `react` and fails, because the Solid
+transform and its imports only exist in the prebuilt bundle. Keep the shim pointing at `dist/`
+and run `npm run build` after changing `src/tui.tsx`.
 
 ## Use
 
@@ -149,6 +171,7 @@ provably the one built from that commit.
 
 ## Limits
 
+- Terminal only. Desktop uses its built-in Quote action instead; TUI slots are not rendered there.
 - Annotations only target assistant text parts, not tool output, reasoning, or diffs.
 - The comment field is single-line (`ui.dialog.prompt`).
 - Reply history is loaded eagerly, 200 messages per page.

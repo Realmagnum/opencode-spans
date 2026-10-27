@@ -21,6 +21,16 @@ import { SpansRpc } from "./rpc.ts"
 
 const PANEL = "spans.panel"
 
+/**
+ * Bumped whenever any component writes the staged record.
+ *
+ * The panel and the composer strip are separate component trees, each with its own
+ * `useRecord`; without a shared revision the strip keeps showing the snapshot it fetched
+ * when it mounted and never notices an annotation staged from the panel.
+ */
+const [recordRevision, setRecordRevision] = createSignal(0)
+const bumpRecordRevision = () => setRecordRevision((value) => value + 1)
+
 type Ctx = ReturnType<typeof usePlugin>
 
 type PanelProps = {
@@ -67,27 +77,27 @@ function useRecord(context: Ctx, sessionID: () => string) {
     const id = sessionID()
     if (!id) return
     await rpc.stage({ sessionID: id, record: next })
-    await refresh()
+    bumpRecordRevision()
   }
 
   const drop = async () => {
     const id = sessionID()
     if (!id) return
     await rpc.drop({ sessionID: id })
-    await refresh()
+    bumpRecordRevision()
   }
 
   const take = async (): Promise<SpanRecord | null> => {
     const id = sessionID()
     if (!id) return null
     const result = (await rpc.take({ sessionID: id })) as RecordResult
-    await refresh()
+    bumpRecordRevision()
     return result.present ? result.record : null
   }
 
-  onMount(() => void refresh())
   createEffect(() => {
     sessionID()
+    recordRevision()
     void refresh()
   })
 

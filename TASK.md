@@ -1,10 +1,24 @@
 ---
-status: done
+status: frozen
 created: 2026-10-28T00:00:00Z
-updated: 2026-10-28T02:05:00Z
+updated: 2026-10-28T03:05:00Z
 ---
 
 # opencode-spans — annotate spans of agent replies
+
+## Status
+
+**Frozen. TUI only.**
+
+The original motivation was annotations in the Desktop app. That is now shipped upstream:
+OpenCode Desktop **2.2.0** quotes selected timeline text into the composer with an optional
+comment per quote (`#55664`, `#58420`). A plugin cannot reproduce that in-place selection —
+Desktop does not render TUI slots (`session.panel`, `session.composer.top`), and the GUI plugin
+API (`./gui-experimental`) has panels and slots but no hook for a timeline selection.
+
+The project therefore stays as a terminal-client tool. `README.md` states the scope; only fixes
+are planned, no Desktop port and no new features.
+
 
 ## Goal
 
@@ -107,8 +121,6 @@ durable server-side state, keyboard-only selection, and edit/delete of staged it
 
 <!-- Append-only journal. Filled only during /microspec.execute. -->
 
-## Result
-
 - S1 — repository scaffolded; `npm run build` emits `dist/tui.js` (44 KB, esbuild + babel-preset-solid).
 - S2 — `npm test` drives 36 assertions across `test/prompt`, `test/source`, `test/selection`, `test/core`, `test/hook`; all pass on Node 22 with `--experimental-strip-types`.
 - S3 — `src/core/hook.ts` owns the prompt rule behind an injected dependency surface; `test/hook.test.ts` asserts the exact rewritten prompt, the shifted `files`/`agents` mention offsets, the per-message staleness check, the consumed-once path, and metadata-based self-detection.
@@ -116,8 +128,19 @@ durable server-side state, keyboard-only selection, and edit/delete of staged it
 - S5 — `.github/workflows/ci.yml` runs typecheck, tests, build, `scripts/check-dist.mjs`, and `git diff --exit-code -- dist`; the run on `main` completed successfully in 21 s.
 - S6 — `opencode plugin add` fails on this 2.0.29 build (`git dep preparation failed` inside its bundled npm, for any ref). Installed with `npm install github:Realmagnum/opencode-spans#v0.1.0` in `~/.config/opencode` and pointed `plugins` at the package directory; the log shows `loading plugin ... entrypoint=.../opencode-spans/server.ts` with no error. Reaching the TUI panel itself needs an interactive session, so `/spans` is verified by typecheck + build, not by an automated keystroke test.
 - S7 — https://github.com/Realmagnum/opencode-spans, branch `main`, tag `v0.1.0`, topics set.
+- S8 — interactive verification on macOS, OpenCode 2.0.29 TUI: the root `tui.tsx` shim now
+  re-exports `dist/tui.js` (it pointed at `src/tui.tsx`, which the loader transpiled with a
+  react JSX runtime and failed with `Cannot find package 'react'`); the composer strip now
+  refreshes when the panel stages or clears (shared `recordRevision` signal) instead of showing
+  the snapshot from its mount. Verified: `/spans` opens the panel, keyboard selection and the
+  comment dialog stage an annotation, the strip survives a TUI restart and updates live.
+  End-to-end run in a disposable session: staged “alpha beta” plus the draft “ping” was admitted
+  with `metadata.spans=attached`, `spansCount=1`, and `> alpha beta` / `**Comment:** e2e-check`
+  in `prompt.text`. The disposable session was deleted afterwards.
+- S9 — scope narrowed and frozen: OpenCode Desktop 2.2.0 ships the same feature natively, so the
+  plugin is TUI-only and receives fixes only. README and this file record the decision.
 
 Notes:
 - `@types/node` in devDependencies made `opencode plugin add` fail inside its bundled npm ("git dep preparation failed") while a plain `npm install` of the same commit succeeded; dropping it and typechecking sources only (tests execute, they are not typechecked) made the git install reproducible. `npm run typecheck` still covers `src/`, both entry shims, and the RPC contract.
-- Local directory installs resolve entry files by name at the package root, so `server.ts`, `tui.tsx`, and `rpc.ts` exist as one-line re-export shims next to `src/`.
+- Local directory installs resolve entry files by name at the package root, so `server.ts`, `tui.tsx`, and `rpc.ts` exist as one-line re-export shims next to `src/`. `tui.tsx` points at `dist/tui.js` rather than the source: the loader compiles root TSX with a react JSX runtime, while the Solid transform and the `@opentui/solid` imports exist only in the prebuilt bundle.
 - Attribution to the plugin that inspired this one is intentionally left out for now, per the user's instruction to add it later.
